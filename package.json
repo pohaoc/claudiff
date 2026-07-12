@@ -1,0 +1,142 @@
+{
+  "name": "claudiff",
+  "displayName": "Inline diff for Claude Code",
+  "description": "No API Key, no SDK, just plugs into your existing Claude Code session via hooks, with inline accept/reject before commiting the changes.",
+  "version": "1.0.0",
+  "publisher": "pohaoc",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "claudiff.accept",
+        "title": "Keep Claude Edit Hunk",
+        "icon": "$(check)"
+      },
+      {
+        "command": "claudiff.reject",
+        "title": "Revert Claude Edit Hunk",
+        "icon": "$(close)"
+      },
+      {
+        "command": "claudiff.next",
+        "title": "Next File Under Review (Defer Current)",
+        "icon": "$(arrow-right)"
+      },
+      {
+        "command": "claudiff.acceptAll",
+        "title": "Keep All Claude Changes in File",
+        "icon": "$(check-all)"
+      },
+      {
+        "command": "claudiff.rejectAll",
+        "title": "Revert All Claude Changes in File",
+        "icon": "$(close-all)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "claudiff.accept",
+          "when": "claudiff.active",
+          "group": "navigation@1"
+        },
+        {
+          "command": "claudiff.reject",
+          "when": "claudiff.active",
+          "group": "navigation@2"
+        },
+        {
+          "command": "claudiff.next",
+          "when": "claudiff.active && claudiff.hasQueue",
+          "group": "navigation@3"
+        },
+        {
+          "command": "claudiff.acceptAll",
+          "when": "claudiff.active",
+          "group": "navigation@4"
+        },
+        {
+          "command": "claudiff.rejectAll",
+          "when": "claudiff.active",
+          "group": "navigation@5"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "claudiff.accept",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "claudiff.active && editorTextFocus"
+      },
+      {
+        "command": "claudiff.reject",
+        "key": "ctrl+backspace",
+        "mac": "cmd+backspace",
+        "when": "claudiff.active && editorTextFocus"
+      },
+      {
+        "command": "claudiff.accept",
+        "key": "ctrl+alt+y",
+        "mac": "cmd+alt+y",
+        "when": "claudiff.active"
+      },
+      {
+        "command": "claudiff.reject",
+        "key": "ctrl+alt+n",
+        "mac": "cmd+alt+n",
+        "when": "claudiff.active"
+      },
+      {
+        "command": "claudiff.next",
+        "key": "ctrl+alt+.",
+        "mac": "cmd+alt+.",
+        "when": "claudiff.active && claudiff.hasQueue"
+      }
+    ],
+    "configuration": {
+      "title": "ClauDiff",
+      "properties": {
+        "claudiff.port": {
+          "type": "number",
+          "default": 48291,
+          "description": "Localhost port the review server listens on. Must match CLAUDIFF_PORT if you override it for the hook script."
+        },
+        "claudiff.reviewModes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "acceptEdits",
+            "auto"
+          ],
+          "description": "Enable inline review for these modes in Claude Code. Defaults to 'acceptEdits' and 'auto', since both already apply edits unblocked — they only differ in what happens to other tools (Bash, WebFetch, ...), which this extension doesn't concern itself with. In other modes (default, plan, dontAsk, bypassPermissions) the hook falls through and your chosen mode behaves natively."
+        },
+        "claudiff.autoApplyOutsideWorkspace": {
+          "type": "boolean",
+          "default": false,
+          "description": "Auto-apply edits to files outside the open workspace folders too. When off, such edits fall through to Claude Code's built-in permission prompt."
+        },
+        "claudiff.style": {
+          "type": "string",
+          "enum": [
+            "inline",
+            "diffTab"
+          ],
+          "default": "inline",
+          "description": "How reviews are rendered. 'inline' shows each hunk as red/green lines in the real file buffer (falls back to a diff tab for dirty buffers or when files.autoSave is on); 'diffTab' always uses VS Code's diff editor (whole-file keep/revert only)."
+        }
+      }
+    }
+  }
+}
