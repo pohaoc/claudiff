@@ -1,2 +1,2 @@
-# betterdiff
-BetterDiff: Inline AI Code Review
+# Claudiff
+ClauDiff: Inline Accept / Reject for Claude Code's Auto Edit Mode
